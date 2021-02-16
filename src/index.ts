@@ -11,6 +11,7 @@ declare type RandomNumberGenerator = (
 
 var DEFAULT_WORDLIST = require("../wordlists/en.json");
 var SPANISH_WORDLIST = require("../wordlists/es.json");
+var PORTUGUESE_WORDLIST = require("./wordlists/pt.json");
 
 async function mnemonicToSeed(mnemonic: string, password: string) {
   var mnemonicBuffer = Buffer.from(mnemonic, "utf8");
@@ -35,7 +36,7 @@ function mnemonicToEntropy(mnemonic: string, wordlist: string[]) {
   var words = mnemonic.split(" ");
   assert(words.length % 3 === 0, "Invalid mnemonic");
 
-  var belongToList = words.every(function (word) {
+  var belongToList = words.every(function(word) {
     return wordlist.indexOf(word) > -1;
   });
 
@@ -43,7 +44,7 @@ function mnemonicToEntropy(mnemonic: string, wordlist: string[]) {
 
   // convert word indices to 11 bit binary strings
   var bits = words
-    .map(function (word) {
+    .map(function(word) {
       var index = wordlist.indexOf(word);
       return lpad(index.toString(2), "0", 11);
     })
@@ -55,11 +56,11 @@ function mnemonicToEntropy(mnemonic: string, wordlist: string[]) {
   var checksum = bits.slice(dividerIndex);
 
   // calculate the checksum and compare
-  var entropyBytes = (entropy.match(/(.{1,8})/g) as Array<string>).map(
-    function (bin) {
-      return parseInt(bin, 2);
-    }
-  );
+  var entropyBytes = (entropy.match(/(.{1,8})/g) as Array<string>).map(function(
+    bin
+  ) {
+    return parseInt(bin, 2);
+  });
   var entropyBuffer = Buffer.from(entropyBytes);
   var newChecksum = checksumBits(entropyBuffer);
 
@@ -78,7 +79,7 @@ function entropyToMnemonic(entropy: string, wordlist: string[]) {
   var bits = entropyBits + checksum;
   var chunks = bits.match(/(.{1,11})/g);
 
-  var words = chunks.map(function (binary: string) {
+  var words = chunks.map(function(binary: string) {
     var index = parseInt(binary, 2);
 
     return wordlist[index];
@@ -119,7 +120,9 @@ function validateMnemonic(mnemonic: string, wordlist: string[]) {
 }
 
 function checksumBits(entropyBuffer: Buffer) {
-  var hash = createHash("sha256").update(entropyBuffer).digest();
+  var hash = createHash("sha256")
+    .update(entropyBuffer)
+    .digest();
 
   // Calculated constants from BIP39
   var ENT = entropyBuffer.length * 8;
@@ -136,7 +139,7 @@ function salt(password: string) {
 
 function bytesToBinary(bytes: any) {
   return bytes
-    .map(function (x: any) {
+    .map(function(x: any) {
       return lpad(x.toString(2), "0", 8);
     })
     .join("");
@@ -157,5 +160,6 @@ module.exports = {
   wordlists: {
     EN: DEFAULT_WORDLIST,
     ES: SPANISH_WORDLIST,
+    PT: PORTUGUESE_WORDLIST,
   },
 };
